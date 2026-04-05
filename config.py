@@ -4,9 +4,14 @@ import os
 from datetime import timedelta
 from os import environ, path
 from dotenv import load_dotenv
+import yaml
 
 BASE_DIR = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(BASE_DIR, ".env"))
+
+# Load YAML configuration
+with open(path.join(BASE_DIR, "config.yaml"), "r") as f:
+    _yaml_config = yaml.safe_load(f) or {}
 
 
 def _is_truthy(value, default=False):
@@ -22,7 +27,7 @@ class Config:
     ENVIRONMENT = environ.get("ENVIRONMENT", "production")
 
     # Flask Core
-    SECRET_KEY = environ.get("TRACK_SECRET_KEY", os.urandom(32).hex())
+    SECRET_KEY = environ.get("TRACK_SECRET_KEY")
     FLASK_DEBUG = _is_truthy(environ.get("FLASK_DEBUG"), False)
     FLASK_APP = "wsgi.py"
 
@@ -38,6 +43,12 @@ class Config:
 
     # Request limits
     MAX_CONTENT_LENGTH = 1024 * 1024  # 1MB
+
+    # Authentication & Rate Limiting
+    _auth_config = _yaml_config.get("authentication", {}).get("rate_limiting", {})
+    MAX_LOGIN_ATTEMPTS = _auth_config.get("max_attempts", 3)
+    LOGIN_ATTEMPT_WINDOW_SECONDS = _auth_config.get("window_seconds", 600)
+    LOGIN_LOCKOUT_SECONDS = _auth_config.get("lockout_seconds", 900)
 
     # Security Headers (custom block)
     SECURITY_HEADERS = {

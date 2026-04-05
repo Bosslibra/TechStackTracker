@@ -1,0 +1,16 @@
+# TechStackTracker Configuration
+
+# Authentication & Rate Limiting
+authentication:
+  rate_limiting:
+    # Maximum number of failed login attempts within the time window before lockout
+    # Default: 3 attempts
+    max_attempts: 3
+    
+    # Time window (in seconds) for tracking failed login attempts
+    # Default: 600 seconds (10 minutes)
+    window_seconds: 600
+    
+    # Duration (in seconds) to lock out a user after exceeding max_attempts
+    # Default: 900 seconds (15 minutes)
+    lockout_seconds: 900
