@@ -1,6 +1,5 @@
 """Class-based Flask app configuration."""
 
-import os
 from datetime import timedelta
 from os import environ, path
 from dotenv import load_dotenv
@@ -49,6 +48,11 @@ class Config:
     MAX_LOGIN_ATTEMPTS = _auth_config.get("max_attempts", 3)
     LOGIN_ATTEMPT_WINDOW_SECONDS = _auth_config.get("window_seconds", 600)
     LOGIN_LOCKOUT_SECONDS = _auth_config.get("lockout_seconds", 900)
+    DUMMY_HASH = (
+        _yaml_config.get("authentication", {})
+        .get("anti_timing_attack", {})
+        .get("dummy_hash")
+    )
 
     # Security Headers (custom block)
     SECURITY_HEADERS = {

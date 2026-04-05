@@ -15,7 +15,6 @@ def health():
         200 OK with JSON containing a status message.
     """
 
-
     # Here I should app services health checks, as db and similar
     # Overkill for now
 

@@ -6,15 +6,17 @@ from functools import lru_cache
 from functools import wraps
 
 from flask import jsonify, request, session
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from config import Config
 
 MAX_ATTEMPTS = Config.MAX_LOGIN_ATTEMPTS
 WINDOW_SECONDS = Config.LOGIN_ATTEMPT_WINDOW_SECONDS
 LOCK_SECONDS = Config.LOGIN_LOCKOUT_SECONDS
 
-_FAILED_ATTEMPTS = {} # TODO: In-memory store for failed login attempts. Needs to be replaced with a persistent store for production.
-_DUMMY_HASH = 'scrypt:32768:8:1$dummy$57ea7677ea2ed85df8e4caec2864fd6f73f4af5ca78f2d3f0bf93013f4f58cfdf59f2704ec6ef42e6db77f5d50f8fcb4f68543c18f20ce44392f4d8f07f80f43'
+# TODO: In-memory store for failed login attempts.
+#       Needs to be replaced with a persistent store for production.
+_FAILED_ATTEMPTS = {}
+_DUMMY_HASH = Config.DUMMY_HASH
 
 
 def _get_client_ip():
@@ -23,7 +25,7 @@ def _get_client_ip():
 
     Takes into account proxied requests by checking the X-Forwarded-For header
     before falling back to the direct remote address.
-    
+
     Returns:
         str: Client IP address, or 'unknown' if unavailable.
     """
@@ -39,11 +41,11 @@ def _prune_attempts(ip, now):
 
     Removes attempt timestamps older than WINDOW_SECONDS to keep the tracking
     bucket current.
-    
+
     Args:
         ip (str): Client IP address.
         now (float): Current Unix timestamp.
-    
+
     Returns:
         dict: Bucket containing pruned 'attempts' list and 'blocked_until' timestamp.
     """
@@ -62,7 +64,7 @@ def is_rate_limited():
 
     Returns True if the client has reached MAX_ATTEMPTS failed logins
     within WINDOW_SECONDS and is still within the LOCK_SECONDS lockout period.
-    
+
     Returns:
         bool: True if rate-limited, False otherwise.
     """
@@ -100,9 +102,9 @@ def clear_failed_logins():
 def _admin_username():
     """
     Retrieve the admin username from environment variables.
-    
+
     Defaults to 'admin' if TRACK_ADMIN_USERNAME is not set.
-    
+
     Returns:
         str: Admin username.
     """
@@ -113,16 +115,16 @@ def _admin_username():
 def _admin_hash():
     """
     Retrieve the admin password hash from environment variables.
-    
+
     Priority:
         1. TRACK_ADMIN_PASSWORD_HASH (recommended, pre-hashed)
         2. TRACK_ADMIN_PASSWORD (hashed on first call)
-    
+
     Result is cached after first retrieval.
-    
+
     Returns:
         str: Werkzeug scrypt password hash.
-    
+
     Raises:
         RuntimeError: If neither environment variable is set.
     """
@@ -132,7 +134,6 @@ def _admin_hash():
 
     plain = os.getenv('TRACK_ADMIN_PASSWORD')
     if plain:
-        from werkzeug.security import generate_password_hash
         return generate_password_hash(plain)
 
     raise RuntimeError(
@@ -144,10 +145,10 @@ def _admin_hash():
 def validate_auth_config():
     """
     Validate that required authentication configuration is present.
-    
+
     Triggers initialization of admin username and password hash.
     Called at application startup to fail fast if credentials are missing.
-    
+
     Raises:
         RuntimeError: If credentials are not configured.
     """
@@ -158,15 +159,15 @@ def validate_auth_config():
 def verify_credentials(username, password):
     """
     Verify that provided credentials match the admin account.
-    
+
     Uses constant-time comparison (hmac.compare_digest) for username
     and werkzeug's check_password_hash for password to prevent timing attacks.
     Always hashes the password even on username mismatch (via dummy hash).
-    
+
     Args:
         username (str): Submitted username.
         password (str): Submitted password (plaintext).
-    
+
     Returns:
         bool: True if both username and password are correct.
     """
@@ -181,7 +182,7 @@ def verify_credentials(username, password):
 def login_user():
     """
     Create an authenticated session for the user.
-    
+
     Initializes session with authenticated flag, username, and CSRF token.
     Marks the session as permanent (persists across browser restarts).
     """
@@ -195,7 +196,7 @@ def login_user():
 def logout_user():
     """
     Destroy the current session.
-    
+
     Clears all session data including authentication status and CSRF token.
     """
     session.clear()
@@ -204,7 +205,7 @@ def logout_user():
 def is_authenticated():
     """
     Check if the current session is authenticated.
-    
+
     Returns:
         bool: True if session contains authenticated flag, False otherwise.
     """
@@ -214,7 +215,7 @@ def is_authenticated():
 def get_csrf_token():
     """
     Retrieve the CSRF token from the current session.
-    
+
     Returns:
         str: Session CSRF token, or empty string if not present.
     """
@@ -224,12 +225,12 @@ def get_csrf_token():
 def login_required(view_func):
     """
     Decorator to enforce authenticated session on an endpoint.
-    
+
     Returns 401 Unauthorized if the user is not authenticated.
-    
+
     Args:
         view_func: Flask route handler to protect.
-    
+
     Returns:
         function: Wrapper that checks authentication before executing view_func.
     """
@@ -245,15 +246,15 @@ def login_required(view_func):
 def csrf_protect(view_func):
     """
     Decorator to enforce CSRF token validation on an endpoint.
-    
+
     Compares the X-CSRF-Token request header against the session token
     using constant-time comparison to prevent token forgery.
-    
+
     Returns 403 Forbidden if the token is missing or invalid.
-    
+
     Args:
         view_func: Flask route handler to protect.
-    
+
     Returns:
         function: Wrapper that validates CSRF token before executing view_func.
     """
