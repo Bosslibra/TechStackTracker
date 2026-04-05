@@ -11,15 +11,15 @@ def create_app():
     with app.app_context():
         # Import the parts of the application
 
-        ## Page-serving blueprints
-        from .home import home
+        # Page-serving blueprints
+        from .home.home import home_bp
 
-        ## API blueprints
+        # API blueprints
         from .app.api import auth, health_check
 
         # Register the blueprints
-        app.register_blueprint(home.home_blueprint)
-        app.register_blueprint(health_check.health_check_blueprint)
-        app.register_blueprint(auth.auth_blueprint)
+        app.register_blueprint(home_bp)
+        app.register_blueprint(health_check.health_check_bp)
+        app.register_blueprint(auth.auth_bp)
 
     return app
