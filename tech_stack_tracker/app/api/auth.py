@@ -1,8 +1,6 @@
 import secrets
 import time
-from flask import Blueprint, jsonify, render_template, request
-
-auth_bp = Blueprint("auth", __name__)
+from flask import Blueprint, jsonify, request
 
 from .auth import (
     clear_failed_logins,
@@ -16,6 +14,10 @@ from .auth import (
     record_failed_login,
     verify_credentials,
 )
+
+
+auth_bp = Blueprint("auth", __name__)
+
 
 @auth_bp.route("/api/auth/login", methods=["POST"])
 def login():
@@ -56,6 +58,7 @@ def login():
     clear_failed_logins()
     login_user()
     return jsonify({'authenticated': True, 'csrfToken': get_csrf_token()})
+
 
 @auth_bp.route('/api/auth/logout', methods=['POST'])
 @login_required
