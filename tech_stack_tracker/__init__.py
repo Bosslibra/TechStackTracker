@@ -5,7 +5,7 @@ from flask import Flask
 
 def create_app():
     """Create the Flask app."""
-    app = Flask(__name__, static_folder='../static', template_folder='../templates')
+    app = Flask(__name__, static_folder='/tech_stack_tracker/static', template_folder='/tech_stack_tracker/home/templates')
     app.config.from_object("config.Config")
 
     with app.app_context():
