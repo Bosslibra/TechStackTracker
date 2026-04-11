@@ -15,11 +15,12 @@ def create_app():
         from .home.home import home_bp
 
         # API blueprints
-        from .app.api import auth, health_check
+        from .app.api import auth, health_check, jobs
 
         # Register the blueprints
         app.register_blueprint(home_bp)
         app.register_blueprint(health_check.health_check_bp)
         app.register_blueprint(auth.auth_bp)
+        app.register_blueprint(jobs.jobs_bp)
 
     return app
