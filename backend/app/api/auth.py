@@ -2,7 +2,7 @@ import secrets
 import time
 from flask import Blueprint, jsonify, request
 
-from ..services.auth import (
+from app.services.auth import (
     clear_failed_logins,
     csrf_protect,
     get_csrf_token,

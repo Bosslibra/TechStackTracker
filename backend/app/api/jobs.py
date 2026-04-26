@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
-from tech_stack_tracker.app.services.auth import csrf_protect, login_required
+from app.services.auth import csrf_protect, login_required
 
-from ..services.jobs import read_jobs, write_jobs
+from app.services.jobs import read_jobs, write_jobs
 
 jobs_bp = Blueprint("jobs", __name__)
 

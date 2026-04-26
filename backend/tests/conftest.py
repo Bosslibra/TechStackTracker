@@ -1,8 +1,8 @@
 import pytest
 from werkzeug.security import generate_password_hash
 
-from tech_stack_tracker import create_app
-from tech_stack_tracker.app.services import auth as auth_service
+from app import create_app
+from app.services import auth as auth_service
 
 
 @pytest.fixture(autouse=True)
