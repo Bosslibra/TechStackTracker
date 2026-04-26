@@ -1,5 +1,5 @@
 """Application entry point"""
 
-from tech_stack_tracker import create_app
+from app import create_app
 
 app = create_app()

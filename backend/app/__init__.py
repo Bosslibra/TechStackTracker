@@ -12,10 +12,10 @@ def create_app():
         # Import the parts of the application
 
         # Page-serving blueprints
-        from .home.home import home_bp
+        from app.home.home import home_bp
 
         # API blueprints
-        from .app.api import auth, health_check, jobs
+        from app.api import auth, health_check, jobs
 
         # Register the blueprints
         app.register_blueprint(home_bp)

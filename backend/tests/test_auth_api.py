@@ -1,5 +1,5 @@
 from config import Config
-from tech_stack_tracker.app.api import auth as auth_api
+from app.api import auth as auth_api
 
 
 def test_auth_status_unauthenticated(client):

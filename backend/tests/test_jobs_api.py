@@ -1,6 +1,6 @@
 import json
 
-from tech_stack_tracker.app.services import jobs as jobs_service
+from app.services import jobs as jobs_service
 
 
 def _login_and_get_csrf(client):
